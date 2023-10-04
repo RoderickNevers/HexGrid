@@ -3,9 +3,8 @@ using UnityEngine;
 
 public class HexCell : MonoBehaviour
 {
-    [SerializeField] private Dictionary<HexDirection, HexCell> neighbors = new();
+    [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbors = new();
 
-    public HexCoordinates coordinates;
     private int elevation = int.MinValue;
 
     public HexCell PathFrom { get; set; }
@@ -15,6 +14,7 @@ public class HexCell : MonoBehaviour
     public int SearchPriority => Distance + SearchHeuristic;
     public bool Walled { get; set; }
 
+    public HexCoordinates Coordinates { get; set; }
     public HexCell GetNeighbor(HexDirection direction) => neighbors[direction];
     public HexEdgeType GetEdgeType(HexDirection direction) => HexMetrics.GetEdgeType(elevation, neighbors[direction].elevation);
     public HexEdgeType GetEdgeType(HexCell otherCell) => HexMetrics.GetEdgeType(elevation, otherCell.elevation);

@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Video;
 
-public class HexGrid : MonoBehaviour {
-
+public class HexGrid : MonoBehaviour
+{
     [Header("Grid Size")]
     [SerializeField] private int _Width = 10;
     [SerializeField] private int _Height = 10;
@@ -13,13 +15,13 @@ public class HexGrid : MonoBehaviour {
     [SerializeField] private HexCell _CellPrefab;
 
     private List<HexCell> cells = new();
-    private HexMesh _HexMesh;
     private HexCellPriorityQueue searchFrontier;
+    private HexCell startingCell;
 
     private void Start ()
-	{
-		SpawnGrid();
-	}
+    {
+        SpawnGrid();
+    }
 
 	private void SpawnGrid()
 	{
@@ -30,6 +32,8 @@ public class HexGrid : MonoBehaviour {
                 CreateCell(x, z, i++);
             }
         }
+
+        startingCell = cells.First();
     }
 
     private void CreateCell(int x, int z, int i)
@@ -39,7 +43,7 @@ public class HexGrid : MonoBehaviour {
         HexCell cell = Instantiate(_CellPrefab);
         cell.transform.SetParent(transform, worldPositionStays: false);
         cell.transform.localPosition = position;
-        cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+        cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
         cells.Add(cell);
 
         if (x > 0)
@@ -86,25 +90,28 @@ public class HexGrid : MonoBehaviour {
     {
         if (Input.GetMouseButton(0))
         {
-            HandleInput();
+            TouchCell();
         }
     }
 
-    private void HandleInput()
+    private void TouchCell()
     {
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(inputRay, out hit))
-        {
-            TouchCell(hit.point);
-        }
-    }
 
-    public void TouchCell(Vector3 position)
-    {
-        position = transform.InverseTransformPoint(position);
-        HexCoordinates coordinates = HexCoordinates.FromPosition(position);
-        Debug.Log("touched at " + coordinates.ToString());
+        if (Physics.Raycast(inputRay, out RaycastHit hit))
+        {
+            HexCell selectedCell = hit.collider.GetComponentInParent<HexCell>();
+            if (selectedCell == null)
+            {
+                return;
+            }
+
+            Debug.Log("touched at " + selectedCell.Coordinates.ToString());
+
+            FindPath(startingCell, selectedCell);
+            //Vector3 position = transform.InverseTransformPoint(hit.point);
+            //HexCoordinates coordinates = HexCoordinates.FromPosition(position);
+        }
     }
 
     public void FindPath(HexCell fromCell, HexCell toCell)
@@ -178,7 +185,7 @@ public class HexGrid : MonoBehaviour {
                 {
                     neighbor.Distance = distance;
                     neighbor.PathFrom = current;
-                    neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
+                    neighbor.SearchHeuristic = neighbor.Coordinates.DistanceTo(toCell.Coordinates);
                     searchFrontier.Enqueue(neighbor);
                 }
                 else if (distance < neighbor.Distance)
