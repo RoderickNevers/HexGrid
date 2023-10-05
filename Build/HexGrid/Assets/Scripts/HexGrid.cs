@@ -88,13 +88,39 @@ public class HexGrid : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
         {
-            TouchCell();
+            TouchTile();
+        }
+
+        HighlightTile();
+    }
+
+    private void HighlightTile()
+    {
+        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(inputRay, out RaycastHit hit))
+        {
+            HexCell selectedCell = hit.collider.GetComponentInParent<HexCell>();
+            if (selectedCell == null || startingCell == selectedCell || selectedCell.IsSelected)
+            {
+                return;
+            }
+
+            selectedCell.HighlightTile();
+
+            cells.ForEach(c =>
+            {
+                if (c != selectedCell || c.IsSelected)
+                {
+                    c.DeHighlight();
+                }
+            });
         }
     }
 
-    private void TouchCell()
+    private void TouchTile()
     {
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -136,11 +162,11 @@ public class HexGrid : MonoBehaviour
         foreach (HexCell cell in cells)
         {
             cell.Distance = int.MaxValue;
-            cell.DisableHighlight();
+            cell.DeselectTile();
         }
 
-        startingCell.EnableHighlight();
-        DestinationCell.EnableHighlight();
+        startingCell.SelectTile();
+        DestinationCell.SelectTile();
 
         var delay = new WaitForSeconds(1 / 60f);
         startingCell.Distance = 0;
@@ -156,7 +182,7 @@ public class HexGrid : MonoBehaviour
                 current = current.PathFrom;
                 while (current != startingCell)
                 {
-                    current.EnableHighlight();
+                    current.SelectTile();
                     current = current.PathFrom;
                 }
 
@@ -184,7 +210,7 @@ public class HexGrid : MonoBehaviour
 
                 int distance = current.Distance;
 
-                if (current.Walled != neighbor.Walled)
+                if (current.IsWalled != neighbor.IsWalled)
                 {
                     continue;
                 }

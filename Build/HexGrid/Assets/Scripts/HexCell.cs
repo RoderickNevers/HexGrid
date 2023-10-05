@@ -7,6 +7,7 @@ public class HexCell : MonoBehaviour
 {
     [SerializeField] private GameObject selectedAsset;
     [SerializeField] private GameObject unselectedAsset;
+    [SerializeField] private GameObject highlightedAsset;
     [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbors = new();
 
     [SerializeField] private bool obstacle;
@@ -19,7 +20,8 @@ public class HexCell : MonoBehaviour
     public int SearchHeuristic { get; set; }
     public int Distance { get; set; }
     public int SearchPriority => Distance + SearchHeuristic;
-    public bool Walled { get; set; }
+    public bool IsWalled { get; set; }
+    public bool IsSelected { get; set; }
     public bool HasObstacle { get => obstacle; set => obstacle = value; }
 
     public HexCell GetNeighbor(HexDirection direction) => neighbors.FirstOrDefault(x => x.Key.Equals(direction)).Value;
@@ -28,7 +30,7 @@ public class HexCell : MonoBehaviour
 
     private void Awake()
     {
-        DisableHighlight();
+        DeselectTile();
     }
 
     public void SetNeighbor(HexDirection direction, HexCell cell)
@@ -38,15 +40,35 @@ public class HexCell : MonoBehaviour
         cell.neighbors.Add((HexDirection)opposite, this);
     }
 
-    public void DisableHighlight()
-    {
-        selectedAsset.SetActive(false);
-        unselectedAsset.SetActive(true);
-    }
-
-    public void EnableHighlight()
+    public void SelectTile()
     {
         selectedAsset.SetActive(true);
+        IsSelected = true;
         unselectedAsset.SetActive(false);
+        highlightedAsset.SetActive(false);
+    }
+
+    public void DeselectTile()
+    {
+        unselectedAsset.SetActive(true);
+        IsSelected = false;
+        selectedAsset.SetActive(false);
+        highlightedAsset.SetActive(false);
+    }
+
+    public void HighlightTile()
+    {
+        selectedAsset.SetActive(false);
+        unselectedAsset.SetActive(false);
+        highlightedAsset.SetActive(true);
+    }
+
+    public void DeHighlight()
+    {
+        if (!IsSelected)
+        {
+            highlightedAsset.SetActive(false);
+            unselectedAsset.SetActive(true);
+        }
     }
 }
