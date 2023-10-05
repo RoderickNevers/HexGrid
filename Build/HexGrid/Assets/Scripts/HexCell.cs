@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class HexCell : MonoBehaviour
 {
+    [SerializeField] private GameObject selectedAsset;
+    [SerializeField] private GameObject unselectedAsset;
     [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbors = new();
 
     private int elevation = int.MinValue;
@@ -15,9 +18,16 @@ public class HexCell : MonoBehaviour
     public bool Walled { get; set; }
 
     public HexCoordinates Coordinates { get; set; }
-    public HexCell GetNeighbor(HexDirection direction) => neighbors[direction];
+    public HexCell GetNeighbor(HexDirection direction) => neighbors.FirstOrDefault(x => x.Key.Equals(direction)).Value;
     public HexEdgeType GetEdgeType(HexDirection direction) => HexMetrics.GetEdgeType(elevation, neighbors[direction].elevation);
     public HexEdgeType GetEdgeType(HexCell otherCell) => HexMetrics.GetEdgeType(elevation, otherCell.elevation);
+
+    private void Awake()
+    {
+        DisableHighlight();
+        HexDirection direction = HexDirection.E;
+        var lol = neighbors.FirstOrDefault(x => x.Key == direction);
+    }
 
     public void SetNeighbor(HexDirection direction, HexCell cell)
     {
@@ -28,11 +38,13 @@ public class HexCell : MonoBehaviour
 
     public void DisableHighlight()
     {
-        //highlight.enabled = false;
+        selectedAsset.SetActive(false);
+        unselectedAsset.SetActive(true);
     }
 
     public void EnableHighlight()
     {
-        //highlight.enabled = true;
+        selectedAsset.SetActive(true);
+        unselectedAsset.SetActive(false);
     }
 }

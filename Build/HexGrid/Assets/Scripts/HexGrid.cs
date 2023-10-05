@@ -106,11 +106,8 @@ public class HexGrid : MonoBehaviour
                 return;
             }
 
-            Debug.Log("touched at " + selectedCell.Coordinates.ToString());
-
+            //Debug.Log("touched at " + selectedCell.Coordinates.ToString());
             FindPath(startingCell, selectedCell);
-            //Vector3 position = transform.InverseTransformPoint(hit.point);
-            //HexCoordinates coordinates = HexCoordinates.FromPosition(position);
         }
     }
 
