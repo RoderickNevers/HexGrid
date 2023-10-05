@@ -8,7 +8,7 @@ public class HexCell : MonoBehaviour
     [SerializeField] private GameObject unselectedAsset;
     [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbors = new();
 
-    private int elevation = int.MinValue;
+    private readonly int elevation = int.MinValue;
 
     public HexCell PathFrom { get; set; }
     public HexCell NextWithSamePriority { get; set; }
@@ -25,8 +25,6 @@ public class HexCell : MonoBehaviour
     private void Awake()
     {
         DisableHighlight();
-        HexDirection direction = HexDirection.E;
-        var lol = neighbors.FirstOrDefault(x => x.Key == direction);
     }
 
     public void SetNeighbor(HexDirection direction, HexCell cell)
