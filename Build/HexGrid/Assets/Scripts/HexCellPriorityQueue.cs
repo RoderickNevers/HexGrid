@@ -2,16 +2,15 @@
 
 public class HexCellPriorityQueue
 {
-
-    private readonly List<HexCell> list = new();
-    private int count = 0;
+    private readonly List<HexCell> hexCells = new();
+    private int total = 0;
     private int minimum = int.MaxValue;
 
-	public int Count => count;
+	public bool HasContents => total > 0;
 
 	public void Enqueue (HexCell cell)
 	{
-		count += 1;
+		total += 1;
 		int priority = cell.SearchPriority;
 
 		if (priority < minimum)
@@ -19,25 +18,25 @@ public class HexCellPriorityQueue
 			minimum = priority;
 		}
 
-		while (priority >= list.Count)
+		while (priority >= hexCells.Count)
 		{
-			list.Add(null);
+			hexCells.Add(null);
 		}
 
-		cell.NextWithSamePriority = list[priority];
-		list[priority] = cell;
+		cell.NextWithSamePriority = hexCells[priority];
+		hexCells[priority] = cell;
 	}
 
 	public HexCell Dequeue ()
 	{
-		count -= 1;
+		total -= 1;
 
-		for (; minimum < list.Count; minimum++)
+		for (int minimum = 0; minimum < hexCells.Count; minimum++)
 		{
-			HexCell cell = list[minimum];
+			HexCell cell = hexCells[minimum];
 			if (cell != null)
 			{
-				list[minimum] = cell.NextWithSamePriority;
+				hexCells[minimum] = cell.NextWithSamePriority;
 				return cell;
 			}
 		}
@@ -47,12 +46,12 @@ public class HexCellPriorityQueue
 
 	public void Change (HexCell cell, int oldPriority)
 	{
-		HexCell current = list[oldPriority];
+		HexCell current = hexCells[oldPriority];
 		HexCell next = current.NextWithSamePriority;
 
 		if (current == cell)
 		{
-			list[oldPriority] = next;
+			hexCells[oldPriority] = next;
 		}
 		else
 		{
@@ -66,13 +65,13 @@ public class HexCellPriorityQueue
 		}
 
 		Enqueue(cell);
-		count -= 1;
+		total -= 1;
 	}
 
 	public void Clear ()
 	{
-		list.Clear();
-		count = 0;
+		hexCells.Clear();
+		total = 0;
 		minimum = int.MaxValue;
 	}
 }

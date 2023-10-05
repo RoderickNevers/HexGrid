@@ -107,6 +107,11 @@ public class HexGrid : MonoBehaviour
             }
 
             //Debug.Log("touched at " + selectedCell.Coordinates.ToString());
+            if (startingCell == selectedCell)
+            {
+                return;
+            }
+
             FindPath(startingCell, selectedCell);
         }
     }
@@ -117,7 +122,7 @@ public class HexGrid : MonoBehaviour
         StartCoroutine(Search(fromCell, toCell));
     }
 
-    IEnumerator Search(HexCell fromCell, HexCell toCell)
+    IEnumerator Search(HexCell startingCell, HexCell DestinationCell)
     {
         if (searchFrontier == null)
         {
@@ -128,32 +133,33 @@ public class HexGrid : MonoBehaviour
             searchFrontier.Clear();
         }
 
-        foreach (HexCell c in cells)
+        foreach (HexCell cell in cells)
         {
-            c.Distance = int.MaxValue;
-            c.DisableHighlight();
+            cell.Distance = int.MaxValue;
+            cell.DisableHighlight();
         }
 
-        fromCell.EnableHighlight();
-        toCell.EnableHighlight();
+        startingCell.EnableHighlight();
+        DestinationCell.EnableHighlight();
 
         var delay = new WaitForSeconds(1 / 60f);
-        fromCell.Distance = 0;
-        searchFrontier.Enqueue(fromCell);
+        startingCell.Distance = 0;
+        searchFrontier.Enqueue(startingCell);
 
-        while (searchFrontier.Count > 0)
+        while (searchFrontier.HasContents)
         {
             yield return delay;
             HexCell current = searchFrontier.Dequeue();
 
-            if (current == toCell)
+            if (current == DestinationCell)
             {
                 current = current.PathFrom;
-                while (current != fromCell)
+                while (current != startingCell)
                 {
                     current.EnableHighlight();
                     current = current.PathFrom;
                 }
+
                 break;
             }
 
@@ -161,6 +167,11 @@ public class HexGrid : MonoBehaviour
             {
                 HexCell neighbor = current.GetNeighbor(d);
                 if (neighbor == null)
+                {
+                    continue;
+                }
+
+                if (neighbor.HasObstacle)
                 {
                     continue;
                 }
@@ -182,7 +193,7 @@ public class HexGrid : MonoBehaviour
                 {
                     neighbor.Distance = distance;
                     neighbor.PathFrom = current;
-                    neighbor.SearchHeuristic = neighbor.Coordinates.DistanceTo(toCell.Coordinates);
+                    neighbor.SearchHeuristic = neighbor.Coordinates.DistanceTo(DestinationCell.Coordinates);
                     searchFrontier.Enqueue(neighbor);
                 }
                 else if (distance < neighbor.Distance)
