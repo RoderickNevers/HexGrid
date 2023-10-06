@@ -23,7 +23,7 @@ public class HexCell : MonoBehaviour
     public int SearchPriority => Distance + SearchHeuristic;
     public bool IsWalled { get; set; }
     public bool IsSelected { get; set; }
-    public bool IsUsed { get; set; }
+    public bool IsUsed { get; private set; }
     public bool IsValid => !HasObstacle && !IsSelected && !IsUsed;
     public bool HasObstacle { get => obstacle; set => obstacle = value; }
 
@@ -41,6 +41,8 @@ public class HexCell : MonoBehaviour
         IsUsed = true;
         usedAsset.SetActive(true);
         highlightedAsset.SetActive(false);
+        unselectedAsset.SetActive(false);
+        selectedAsset.SetActive(false);
     }
 
     public void SetNeighbor(HexDirection direction, HexCell cell)

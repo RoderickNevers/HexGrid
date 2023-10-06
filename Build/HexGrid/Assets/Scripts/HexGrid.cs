@@ -17,6 +17,13 @@ public class HexGrid : MonoBehaviour
     private HexCellPriorityQueue searchFrontier;
     private HexCell startingCell;
     private GamePlayerPhase gamePlayerPhase = GamePlayerPhase.Build;
+    private readonly List<HexDirection> pattern = new()
+        {
+            HexDirection.W,
+            HexDirection.NW,
+            HexDirection.NE,
+            HexDirection.E
+        };
 
     private void Start ()
     {
@@ -34,6 +41,7 @@ public class HexGrid : MonoBehaviour
         }
 
         startingCell = cells.First();
+        startingCell.UseCell();
     }
 
     private void CreateCell(int x, int z, int i)
@@ -125,13 +133,7 @@ public class HexGrid : MonoBehaviour
         }
     }
 
-    List<HexDirection> pattern = new()
-        {
-            HexDirection.W,
-            HexDirection.NW,
-            HexDirection.NE,
-            HexDirection.E
-        };
+
 
     private void HighlightShape(HexCell selectedCell)
     {
@@ -172,8 +174,10 @@ public class HexGrid : MonoBehaviour
 
         cleanedCellsOnly.ForEach(cell => cell.HighlightTile());
 
+        var notAlone = cleanedCellsOnly.Any(cell => cell.Neighbours.Any(n => n.Value.IsUsed));
+
         // Handle selecting the tiles/cells
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && notAlone)
         {
             cleanedCellsOnly.ForEach(cell => cell.UseCell());
         }
