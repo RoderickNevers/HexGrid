@@ -93,10 +93,10 @@ public class HexGrid : MonoBehaviour
             TouchTile();
         }
 
-        HighlightTile();
+        MouseOverTile();
     }
 
-    private void HighlightTile()
+    private void MouseOverTile()
     {
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -108,15 +108,52 @@ public class HexGrid : MonoBehaviour
                 return;
             }
 
-            selectedCell.HighlightTile();
+            HighlightShape(selectedCell);
+        }
+    }
 
-            cells.ForEach(c =>
-            {
-                if (c != selectedCell || c.IsSelected)
-                {
-                    c.DeHighlight();
-                }
-            });
+    private void HighlightShape(HexCell selectedCell)
+    {
+        var roughSelected = selectedCell.Neighbours.Where(x =>
+            x.Key.Equals(HexDirection.W)  && !x.Value.HasObstacle && !x.Value.IsSelected ||
+            x.Key.Equals(HexDirection.NW) && !x.Value.HasObstacle && !x.Value.IsSelected ||
+            x.Key.Equals(HexDirection.NE) && !x.Value.HasObstacle && !x.Value.IsSelected ||
+            x.Key.Equals(HexDirection.E) && !x.Value.HasObstacle && !x.Value.IsSelected);
+
+        var pattern = new List<HexDirection>() 
+        {
+            HexDirection.W,
+            HexDirection.NW,
+            HexDirection.NE,
+            HexDirection.E
+        };
+
+        var cleanedSelected = new Dictionary<HexDirection, HexCell>();
+        var cleanedCellsOnly = new List<HexCell>();
+
+        foreach (KeyValuePair<HexDirection, HexCell> cell in roughSelected)
+        {
+            cleanedSelected.Add(cell.Key, cell.Value);
+            cleanedCellsOnly.Add(cell.Value);
+        }
+
+        if (cleanedCellsOnly.Count != pattern.Count)
+        {
+            return;
+        }
+
+        cleanedCellsOnly.Add(selectedCell);
+
+        cleanedCellsOnly.ForEach(cell => cell.HighlightTile());
+
+        var dups = new List<HexCell>();
+        cleanedCellsOnly.ForEach(hexcell => dups.Add(hexcell));
+
+        IEnumerable<HexCell> others = cells.Except(dups);
+
+        foreach (HexCell cell in others)
+        {
+            cell.DeHighlight();
         }
     }
 

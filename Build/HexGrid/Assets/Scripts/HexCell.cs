@@ -8,15 +8,15 @@ public class HexCell : MonoBehaviour
     [SerializeField] private GameObject selectedAsset;
     [SerializeField] private GameObject unselectedAsset;
     [SerializeField] private GameObject highlightedAsset;
-    [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbors = new();
-
     [SerializeField] private bool obstacle;
 
+    [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbours = new();
     private readonly int elevation = int.MinValue;
 
     public HexCell PathFrom { get; set; }
     public HexCell NextWithSamePriority { get; set; }
     public HexCoordinates Coordinates { get; set; }
+    public Dictionary<HexDirection, HexCell> Neighbours => neighbours;
     public int SearchHeuristic { get; set; }
     public int Distance { get; set; }
     public int SearchPriority => Distance + SearchHeuristic;
@@ -24,8 +24,8 @@ public class HexCell : MonoBehaviour
     public bool IsSelected { get; set; }
     public bool HasObstacle { get => obstacle; set => obstacle = value; }
 
-    public HexCell GetNeighbor(HexDirection direction) => neighbors.FirstOrDefault(x => x.Key.Equals(direction)).Value;
-    public HexEdgeType GetEdgeType(HexDirection direction) => HexMetrics.GetEdgeType(elevation, neighbors[direction].elevation);
+    public HexCell GetNeighbor(HexDirection direction) => neighbours.FirstOrDefault(x => x.Key.Equals(direction)).Value;
+    public HexEdgeType GetEdgeType(HexDirection direction) => HexMetrics.GetEdgeType(elevation, neighbours[direction].elevation);
     public HexEdgeType GetEdgeType(HexCell otherCell) => HexMetrics.GetEdgeType(elevation, otherCell.elevation);
 
     private void Awake()
@@ -35,9 +35,9 @@ public class HexCell : MonoBehaviour
 
     public void SetNeighbor(HexDirection direction, HexCell cell)
     {
-        neighbors.Add(direction, cell);
+        neighbours.Add(direction, cell);
         int opposite = (int)direction.Opposite();
-        cell.neighbors.Add((HexDirection)opposite, this);
+        cell.neighbours.Add((HexDirection)opposite, this);
     }
 
     public void SelectTile()
