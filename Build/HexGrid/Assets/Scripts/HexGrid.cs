@@ -138,7 +138,7 @@ public class HexGrid : MonoBehaviour
         }
 
         int total = 0;
-        foreach (var cell in cleanedSelected)
+        foreach (KeyValuePair<HexDirection, HexCell> cell in cleanedSelected)
         {
             if (cell.Key.Equals(HexDirection.W))
             {
