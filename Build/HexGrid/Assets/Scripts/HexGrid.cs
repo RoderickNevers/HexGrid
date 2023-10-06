@@ -137,7 +137,31 @@ public class HexGrid : MonoBehaviour
             cleanedCellsOnly.Add(cell.Value);
         }
 
-        if (cleanedCellsOnly.Count != pattern.Count)
+        int total = 0;
+        foreach (var cell in cleanedSelected)
+        {
+            if (cell.Key.Equals(HexDirection.W))
+            {
+                total++;
+            }
+
+            if (cell.Key.Equals(HexDirection.NW))
+            {
+                total++;
+            }
+
+            if (cell.Key.Equals(HexDirection.NE))
+            {
+                total++;
+            }
+
+            if (cell.Key.Equals(HexDirection.E))
+            {
+                total++;
+            }
+        }
+
+        if (total != pattern.Count)
         {
             return;
         }
