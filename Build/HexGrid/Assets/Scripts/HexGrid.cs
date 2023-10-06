@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Video;
 
 public class HexGrid : MonoBehaviour
 {
@@ -17,6 +16,7 @@ public class HexGrid : MonoBehaviour
     private List<HexCell> cells = new();
     private HexCellPriorityQueue searchFrontier;
     private HexCell startingCell;
+    private GamePlayerPhase gamePlayerPhase = GamePlayerPhase.Build;
 
     private void Start ()
     {
@@ -88,12 +88,25 @@ public class HexGrid : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        switch (gamePlayerPhase)
         {
-            TouchTile();
-        }
+            case GamePlayerPhase.Build:
+                MouseOverTile();
+                break;
 
-        MouseOverTile();
+            case GamePlayerPhase.Move:
+                if (Input.GetMouseButtonDown(0))
+                {
+                    TouchTile();
+                }
+                break;
+
+            case GamePlayerPhase.Explore:
+                break;
+
+            case GamePlayerPhase.Visit:
+                break;
+        }
     }
 
     private void MouseOverTile()
@@ -112,21 +125,21 @@ public class HexGrid : MonoBehaviour
         }
     }
 
-    private void HighlightShape(HexCell selectedCell)
-    {
-        var roughSelected = selectedCell.Neighbours.Where(x =>
-            x.Key.Equals(HexDirection.W)  && !x.Value.HasObstacle && !x.Value.IsSelected ||
-            x.Key.Equals(HexDirection.NW) && !x.Value.HasObstacle && !x.Value.IsSelected ||
-            x.Key.Equals(HexDirection.NE) && !x.Value.HasObstacle && !x.Value.IsSelected ||
-            x.Key.Equals(HexDirection.E) && !x.Value.HasObstacle && !x.Value.IsSelected);
-
-        var pattern = new List<HexDirection>() 
+    List<HexDirection> pattern = new()
         {
             HexDirection.W,
             HexDirection.NW,
             HexDirection.NE,
             HexDirection.E
         };
+
+    private void HighlightShape(HexCell selectedCell)
+    {
+        var roughSelected = selectedCell.Neighbours.Where(x =>
+            x.Key.Equals(HexDirection.W) && x.Value.IsValid ||
+            x.Key.Equals(HexDirection.NW) && x.Value.IsValid ||
+            x.Key.Equals(HexDirection.NE) && x.Value.IsValid ||
+            x.Key.Equals(HexDirection.E) && x.Value.IsValid);
 
         var cleanedSelected = new Dictionary<HexDirection, HexCell>();
         var cleanedCellsOnly = new List<HexCell>();
@@ -140,24 +153,13 @@ public class HexGrid : MonoBehaviour
         int total = 0;
         foreach (KeyValuePair<HexDirection, HexCell> cell in cleanedSelected)
         {
-            if (cell.Key.Equals(HexDirection.W))
+            foreach (HexDirection pattern in pattern)
             {
-                total++;
-            }
-
-            if (cell.Key.Equals(HexDirection.NW))
-            {
-                total++;
-            }
-
-            if (cell.Key.Equals(HexDirection.NE))
-            {
-                total++;
-            }
-
-            if (cell.Key.Equals(HexDirection.E))
-            {
-                total++;
+                if (cell.Key.Equals(pattern))
+                {
+                    total++;
+                    break;
+                }
             }
         }
 
@@ -170,6 +172,12 @@ public class HexGrid : MonoBehaviour
 
         cleanedCellsOnly.ForEach(cell => cell.HighlightTile());
 
+        // Handle selecting the tiles/cells
+        if (Input.GetMouseButtonDown(0))
+        {
+            cleanedCellsOnly.ForEach(cell => cell.UseCell());
+        }
+
         var dups = new List<HexCell>();
         cleanedCellsOnly.ForEach(hexcell => dups.Add(hexcell));
 
@@ -177,6 +185,11 @@ public class HexGrid : MonoBehaviour
 
         foreach (HexCell cell in others)
         {
+            if (cell.IsUsed)
+            {
+                continue;
+            }
+
             cell.DeHighlight();
         }
     }
@@ -194,22 +207,29 @@ public class HexGrid : MonoBehaviour
             }
 
             //Debug.Log("touched at " + selectedCell.Coordinates.ToString());
-            if (startingCell == selectedCell)
+
+            switch(gamePlayerPhase)
             {
-                return;
+                case GamePlayerPhase.Move:
+                    if (startingCell == selectedCell)
+                    {
+                        return;
+                    }
+
+                    FindPath(startingCell, selectedCell);
+                    break;
             }
 
-            FindPath(startingCell, selectedCell);
         }
     }
 
-    public void FindPath(HexCell fromCell, HexCell toCell)
+    private void FindPath(HexCell fromCell, HexCell toCell)
     {
         StopAllCoroutines();
         StartCoroutine(Search(fromCell, toCell));
     }
 
-    IEnumerator Search(HexCell startingCell, HexCell DestinationCell)
+    private IEnumerator Search(HexCell startingCell, HexCell DestinationCell)
     {
         if (searchFrontier == null)
         {

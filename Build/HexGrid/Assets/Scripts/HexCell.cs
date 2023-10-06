@@ -8,6 +8,7 @@ public class HexCell : MonoBehaviour
     [SerializeField] private GameObject selectedAsset;
     [SerializeField] private GameObject unselectedAsset;
     [SerializeField] private GameObject highlightedAsset;
+    [SerializeField] private GameObject usedAsset;
     [SerializeField] private bool obstacle;
 
     [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbours = new();
@@ -22,6 +23,8 @@ public class HexCell : MonoBehaviour
     public int SearchPriority => Distance + SearchHeuristic;
     public bool IsWalled { get; set; }
     public bool IsSelected { get; set; }
+    public bool IsUsed { get; set; }
+    public bool IsValid => !HasObstacle && !IsSelected && !IsUsed;
     public bool HasObstacle { get => obstacle; set => obstacle = value; }
 
     public HexCell GetNeighbor(HexDirection direction) => neighbours.FirstOrDefault(x => x.Key.Equals(direction)).Value;
@@ -31,6 +34,13 @@ public class HexCell : MonoBehaviour
     private void Awake()
     {
         DeselectTile();
+    }
+
+    public void UseCell()
+    {
+        IsUsed = true;
+        usedAsset.SetActive(true);
+        highlightedAsset.SetActive(false);
     }
 
     public void SetNeighbor(HexDirection direction, HexCell cell)
