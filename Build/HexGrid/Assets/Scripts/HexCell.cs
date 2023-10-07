@@ -12,7 +12,6 @@ public class HexCell : MonoBehaviour
     [SerializeField] private bool obstacle;
 
     [SerializeField] private readonly Dictionary<HexDirection, HexCell> neighbours = new();
-    private readonly int elevation = int.MinValue;
 
     public HexCell PathFrom { get; set; }
     public HexCell NextWithSamePriority { get; set; }
@@ -28,8 +27,6 @@ public class HexCell : MonoBehaviour
     public bool HasObstacle { get => obstacle; set => obstacle = value; }
 
     public HexCell GetNeighbor(HexDirection direction) => neighbours.FirstOrDefault(x => x.Key.Equals(direction)).Value;
-    public HexEdgeType GetEdgeType(HexDirection direction) => HexMetrics.GetEdgeType(elevation, neighbours[direction].elevation);
-    public HexEdgeType GetEdgeType(HexCell otherCell) => HexMetrics.GetEdgeType(elevation, otherCell.elevation);
 
     private void Awake()
     {

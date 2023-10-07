@@ -27,21 +27,4 @@ public static class HexMetrics
     {
         return corners[(int)direction + 1];
     }
-
-    public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
-    {
-        if (elevation1 == elevation2)
-        {
-            return HexEdgeType.Flat;
-        }
-
-        int delta = elevation2 - elevation1;
-
-        if (delta == 1 || delta == -1)
-        {
-            return HexEdgeType.Slope;
-        }
-
-        return HexEdgeType.Cliff;
-    }
 }

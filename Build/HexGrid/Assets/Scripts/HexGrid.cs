@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 public class HexGrid : MonoBehaviour
 {
     [Header("Grid Size")]
-    [SerializeField] private int _Width = 10;
-    [SerializeField] private int _Height = 10;
+    [SerializeField] private int width = 11;
+    [SerializeField] private int height = 11;
 
     [Header("Prefabs")]
     [SerializeField] private HexCell _CellPrefab;
@@ -32,9 +32,9 @@ public class HexGrid : MonoBehaviour
 
 	private void SpawnGrid()
 	{
-        for (int z = 0, i = 0; z < _Height; z++)
+        for (int z = 0, i = 0; z < height; z++)
         {
-            for (int x = 0; x < _Width; x++)
+            for (int x = 0; x < width; x++)
             {
                 CreateCell(x, z, i++);
             }
@@ -63,18 +63,18 @@ public class HexGrid : MonoBehaviour
         {
             if ((z & 1) == 0)
             {
-                cell.SetNeighbor(HexDirection.SE, cells[i - _Width]);
+                cell.SetNeighbor(HexDirection.SE, cells[i - width]);
                 if (x > 0)
                 {
-                    cell.SetNeighbor(HexDirection.SW, cells[i - _Width - 1]);
+                    cell.SetNeighbor(HexDirection.SW, cells[i - width - 1]);
                 }
             }
             else
             {
-                cell.SetNeighbor(HexDirection.SW, cells[i - _Width]);
-                if (x < _Width - 1)
+                cell.SetNeighbor(HexDirection.SW, cells[i - width]);
+                if (x < width - 1)
                 {
-                    cell.SetNeighbor(HexDirection.SE, cells[i - _Width + 1]);
+                    cell.SetNeighbor(HexDirection.SE, cells[i - width + 1]);
                 }
             }
         }
@@ -132,8 +132,6 @@ public class HexGrid : MonoBehaviour
             HighlightShape(selectedCell);
         }
     }
-
-
 
     private void HighlightShape(HexCell selectedCell)
     {
@@ -223,7 +221,6 @@ public class HexGrid : MonoBehaviour
                     FindPath(startingCell, selectedCell);
                     break;
             }
-
         }
     }
 
@@ -283,12 +280,6 @@ public class HexGrid : MonoBehaviour
                 }
 
                 if (neighbor.HasObstacle)
-                {
-                    continue;
-                }
-
-                HexEdgeType edgeType = current.GetEdgeType(neighbor);
-                if (edgeType == HexEdgeType.Cliff)
                 {
                     continue;
                 }
